@@ -257,7 +257,7 @@ issi3733_led_t *led_cur;
 uint8_t led_per_run = 15;
 float breathe_mult;
 
-void led_matrix_run(led_setup_t *f)
+void led_matrix_run(led_setup_t *f, specific_led_t *specific_led)
 {
     float ro;
     float go;
@@ -305,6 +305,17 @@ void led_matrix_run(led_setup_t *f)
         ro = 0;
         go = 0;
         bo = 0;
+
+        uint8_t cur = 0;
+
+        while (specific_led[cur].stop != 1) {
+            if (led_cur->id >= specific_led[cur].start && led_cur->id <= specific_led[cur].end) {
+              ro = specific_led[cur].color.r;
+              go = specific_led[cur].color.g;
+              bo = specific_led[cur].color.b;
+            }
+            cur++;
+        }
 
         if (led_lighting_mode == LED_MODE_KEYS_ONLY && led_cur->scan == 255)
         {
@@ -459,7 +470,7 @@ uint8_t led_matrix_init(void)
 
     //Run led matrix code once for initial LED coloring
     led_cur = 0;
-    led_matrix_run((led_setup_t*)led_setups[led_animation_id]);
+    led_matrix_run((led_setup_t*)led_setups[led_animation_id], (specific_led_t*) led_specific_colors[0]);
 
     DBGC(DC_LED_MATRIX_INIT_COMPLETE);
 
@@ -502,7 +513,8 @@ void led_matrix_task(void)
     if (led_cur != lede)
     {
         //m15_off; //debug profiling
-        led_matrix_run((led_setup_t*)led_setups[led_animation_id]);
+        uint8_t layer = biton32(layer_state);
+        led_matrix_run((led_setup_t*)led_setups[led_animation_id], (specific_led_t*) led_specific_colors[layer]);
         //m15_on; //debug profiling
     }
 }

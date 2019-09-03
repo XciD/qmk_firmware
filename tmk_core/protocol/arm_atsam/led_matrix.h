@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //From keyboard
 #include "config_led.h"
+#include "util.h"
 
 //CS1-CS16 Current Source "Col"
 #define ISSI3733_CS_COUNT 16
@@ -112,6 +113,20 @@ typedef struct led_setup_s {
   uint8_t end;      //Set to signal end of the setup
 } led_setup_t;
 
+typedef struct color {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+} color;
+
+typedef struct specific_led_s {
+  uint8_t start;
+  uint8_t end;
+  uint8_t stop;
+  color color;
+  uint8_t intensity;
+} specific_led_t;
+
 extern issi3733_driver_t issidrv[ISSI3733_DRIVER_COUNT];
 
 extern uint8_t gcr_desired;
@@ -129,12 +144,15 @@ extern uint8_t led_animation_breathe_cur;
 extern uint8_t breathe_dir;
 extern const uint8_t led_setups_count;
 
+extern uint32_t layer_state;
+
 extern void *led_setups[];
+extern void *led_specific_colors[];
 
 extern issi3733_led_t *led_cur;
 extern issi3733_led_t *lede;
 
-void led_matrix_run(led_setup_t *f);
+void led_matrix_run(led_setup_t *f, specific_led_t *specific_led_t);
 void led_matrix_task(void);
 
 void gcr_compute(void);

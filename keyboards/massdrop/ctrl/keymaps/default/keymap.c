@@ -20,6 +20,10 @@ enum ctrl_keycodes {
     DBG_KBD,            //DEBUG Toggle Keyboard Prints
     DBG_MOU,            //DEBUG Toggle Mouse Prints
     MD_BOOT,            //Restart into bootloader after hold timeout
+
+    FR_E1,
+    FR_E2,
+    FR_A,
 };
 
 #define TG_NKRO MAGIC_TOGGLE_NKRO //Toggle 6KRO / NKRO mode
@@ -37,7 +41,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [1] = LAYOUT(
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,            KC_MUTE, KC_TRNS, KC_TRNS, \
-        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,   KC_MPLY, KC_MSTP, KC_VOLU, \
+        KC_TRNS, KC_TRNS, FR_E1,   KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, FR_E2,   KC_TRNS, KC_TRNS, FR_A,    KC_TRNS, KC_TRNS, KC_TRNS,   KC_MPLY, KC_MSTP, KC_VOLU, \
         L_T_BR,  L_PSD,   L_BRI,   L_PSI,   KC_TRNS, KC_TRNS, KC_TRNS, U_T_AUTO,U_T_AGCR,KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,   KC_MPRV, KC_MNXT, KC_VOLD, \
         L_T_PTD, L_PTP,   L_BRD,   L_PTN,   KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, \
         KC_TRNS, L_T_MD,  L_T_ONF, KC_TRNS, KC_TRNS, MD_BOOT, TG_NKRO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,                              KC_TRNS, \
@@ -61,6 +65,8 @@ const uint16_t PROGMEM fn_actions[] = {
 
 // Runs just one time when the keyboard initializes.
 void matrix_init_user(void) {
+  led_lighting_mode = LED_MODE_KEYS_ONLY;
+  led_animation_speed = 1;
 };
 
 // Runs constantly in the background, in a loop.
@@ -72,8 +78,6 @@ void matrix_scan_user(void) {
 #define MODS_ALT  (keyboard_report->mods & MOD_BIT(KC_LALT) || keyboard_report->mods & MOD_BIT(KC_RALT))
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    static uint32_t key_timer;
-
     switch (keycode) {
         case L_BRI:
             if (record->event.pressed) {
@@ -202,11 +206,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case MD_BOOT:
             if (record->event.pressed) {
-                key_timer = timer_read32();
-            } else {
-                if (timer_elapsed32(key_timer) >= 500) {
-                    reset_keyboard();
-                }
+                reset_keyboard();
+            }
+            return false;
+        case FR_E1:
+            if (record->event.pressed) {
+               send_string_with_delay_P("é", 6);
+            }
+            return false;
+        case FR_E2:
+            if (record->event.pressed) {
+                send_string_with_delay_P("è", 6);
+            }
+            return false;
+        case FR_A:
+            if (record->event.pressed) {
+                send_string_with_delay_P("à", 6);
             }
             return false;
         default:
